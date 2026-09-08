@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/app">
+        <file>Nex.ico</file>
+    </qresource>
+</RCC>

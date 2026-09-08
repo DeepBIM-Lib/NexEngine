@@ -1,0 +1,3 @@
+#define MAIN_ICON 101
+
+MAIN_ICON ICON "./Nex.ico"

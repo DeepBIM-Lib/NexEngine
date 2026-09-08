@@ -1,0 +1,294 @@
+using flecs.script
+using flecs.meta
+using NexEngine.*
+
+const rng : math.Rng = {}
+
+template BoxPiece {
+  prop x = 0.0
+  prop y = 0.0
+  prop z = 0.0
+  prop width = 1.0
+  prop height = 1.0
+  prop depth = 1.0
+  prop red = 1.0
+  prop green = 1.0
+  prop blue = 1.0
+  prop metallic = 0.0
+  prop roughness = 1.0
+
+  Position: {$x, $y, $z}
+  Scale: {$width, $height, $depth}
+  (PrimitiveSource, Cube): {1.0, 1.0, 1.0}
+  Material: {}
+  (MaterialSource, PBRMaterial): {
+    BaseColor: {$red, $green, $blue, 1.0}
+    Metallic: $metallic
+    Roughness: $roughness
+  }
+  Renderer:{
+    RenderType : All,
+    Visible : true
+  }
+}
+
+@tree Parent
+template Tree {
+  prop height = 1.0
+
+  const trunkY = 0.5
+  const canopyY = $height - $trunkY
+
+  BoxPiece(
+    y: $trunkY / 2.0,
+    width: 0.1,
+    height: $trunkY,
+    depth: 0.1,
+    red: 0.08,
+    green: 0.03,
+    blue: 0.0,
+    roughness: 0.07
+  ) {}
+  BoxPiece(
+    y: $trunkY + $canopyY / 2.0,
+    width: 0.5,
+    height: $canopyY,
+    depth: 0.5,
+    red: 0.1,
+    green: 0.2,
+    blue: 0.06,
+    roughness: 0.07
+  ) {}
+}
+
+@tree Parent
+template Pavement {
+  prop width = 5.0
+
+  BoxPiece(
+    width: $width,
+    height: 0.1,
+    depth: $width,
+    red: 0.2,
+    green: 0.2,
+    blue: 0.2
+  ) {}
+
+  const trees = 2
+  const spacing = $width / $trees
+  const offset = ($width / 2.0) - 0.2
+
+  for i in 0..$trees {
+    const position = ($i + 0.5) * $spacing - $width / 2.0
+
+    Tree(height: $rng.f(2.0) + 2.0) {
+      Position: {-$offset, 0.0, $position}
+    }
+    Tree(height: $rng.f(2.0) + 2.0) {
+      Position: {$offset, 0.0, $position}
+    }
+    Tree(height: $rng.f(2.0) + 2.0) {
+      Position: {$position, 0.0, -$offset}
+    }
+    Tree(height: $rng.f(2.0) + 1.0) {
+      Position: {$position, 0.0, $offset}
+    }
+  }
+}
+
+@tree Parent
+template Building {
+  prop width = 4.0
+  prop floors = 8
+  prop windows = 3
+  prop windowSpacing = 0.4
+  prop floorThickness = 0.6
+  prop colorRed255 = 76.5
+  prop colorGreen255 = 76.5
+  prop colorBlue255 = 76.5
+
+  BoxPiece(
+    y: $floors,
+    width: $width - 0.2,
+    height: $floors * 2.0,
+    depth: $width - 0.2,
+    red: 0.01,
+    green: 0.02,
+    blue: 0.05,
+    roughness: 0.07
+  ) {}
+
+  const pillars = $windows + 2
+  const wallWidth = $width - $windowSpacing
+  const wallWidthHalf = $wallWidth / 2.0
+  const spacing = $wallWidth / ($pillars - 1)
+  const wallRed = $colorRed255 / 255.0
+  const wallGreen = $colorGreen255 / 255.0
+  const wallBlue = $colorBlue255 / 255.0
+
+  for floor in 0..$floors {
+    BoxPiece(
+      y: 2.0 * $floor + 2.0,
+      width: $width,
+      height: $floorThickness,
+      depth: $width,
+      red: $wallRed,
+      green: $wallGreen,
+      blue: $wallBlue
+    ) {}
+  }
+
+  for pillar in 1..($pillars - 1) {
+    BoxPiece(
+      x: $pillar * $spacing - $wallWidthHalf,
+      y: $floors,
+      width: $windowSpacing,
+      height: $floors * 2.0,
+      depth: $width,
+      red: $wallRed,
+      green: $wallGreen,
+      blue: $wallBlue
+    ) {}
+    BoxPiece(
+      y: $floors,
+      z: $pillar * $spacing - $wallWidthHalf,
+      width: $width,
+      height: $floors * 2.0,
+      depth: $windowSpacing,
+      red: $wallRed,
+      green: $wallGreen,
+      blue: $wallBlue
+    ) {}
+  }
+
+  BoxPiece(
+    x: -$wallWidthHalf,
+    y: $floors,
+    z: -$wallWidthHalf,
+    width: $windowSpacing,
+    height: $floors * 2.0,
+    depth: $windowSpacing,
+    red: $wallRed,
+    green: $wallGreen,
+    blue: $wallBlue
+  ) {}
+  BoxPiece(
+    x: -$wallWidthHalf,
+    y: $floors,
+    z: $wallWidthHalf,
+    width: $windowSpacing,
+    height: $floors * 2.0,
+    depth: $windowSpacing,
+    red: $wallRed,
+    green: $wallGreen,
+    blue: $wallBlue
+  ) {}
+  BoxPiece(
+    x: $wallWidthHalf,
+    y: $floors,
+    z: $wallWidthHalf,
+    width: $windowSpacing,
+    height: $floors * 2.0,
+    depth: $windowSpacing,
+    red: $wallRed,
+    green: $wallGreen,
+    blue: $wallBlue
+  ) {}
+  BoxPiece(
+    x: $wallWidthHalf,
+    y: $floors,
+    z: -$wallWidthHalf,
+    width: $windowSpacing,
+    height: $floors * 2.0,
+    depth: $windowSpacing,
+    red: $wallRed,
+    green: $wallGreen,
+    blue: $wallBlue
+  ) {}
+}
+
+@tree Parent
+template City {
+  prop gridSize = 1
+  prop blockWidth = 17.0
+  prop pavementWidth = 12.0
+  prop buildingWidth = 8.0
+  prop maxFloors = 26.0
+  prop varFloors = 4
+
+  const gridSizeHalf = $gridSize / 2.0
+  const groundSize = ($gridSize + 2) * $blockWidth
+
+  BoxPiece(
+    y: 0.05,
+    width: $groundSize,
+    height: 0.1,
+    depth: $groundSize,
+    red: 0.08,
+    green: 0.08,
+    blue: 0.08
+  ) {}
+
+  for x in 0..$gridSize {
+    for z in 0..$gridSize {
+      const xRelative = $x - $gridSizeHalf
+      const zRelative = $z - $gridSizeHalf
+      const xScale =
+        1.0 - (math.abs($xRelative + 0.5) / $gridSizeHalf)
+      const zScale =
+        1.0 - (math.abs($zRelative + 0.5) / $gridSizeHalf)
+      const baseFloors =
+        math.pow($xScale, 2.0) *
+        math.pow($zScale, 2.0) *
+        $maxFloors
+      const xPosition =
+        $xRelative * $blockWidth + $blockWidth / 2.0
+      const zPosition =
+        $zRelative * $blockWidth + $blockWidth / 2.0
+      const rgb255 = $rng.f(127.5) + 12.75
+
+      Pavement(width: $pavementWidth) {
+        Position: {$xPosition, 0.1, $zPosition}
+      }
+
+      Building(
+        width: $buildingWidth,
+        floors: $baseFloors + $rng.u($varFloors) + 1,
+        windows: $rng.u(5) + 1,
+        floorThickness: $rng.f(0.2) + 0.4,
+        windowSpacing: $rng.f(0.6) + 0.2,
+        colorRed255: $rgb255 + $rng.f(38.25),
+        colorGreen255: $rgb255,
+        colorBlue255: $rgb255
+      ) {
+        Position: {$xPosition, 0.1, $zPosition}
+      }
+    }
+  }
+}
+
+MainScene {
+  Scene: {}
+
+  EnvironmentLight: {
+    AmbientColor: {0.22, 0.22, 0.22}
+    AmbientIntensity: 1.0
+  }
+
+  DirectionalLight: {
+    Direction: {0.35, -0.85, -0.4}
+    Color: {1.0, 1.0, 1.0}
+    Intensity: 1.6
+  }
+
+  MainCamera {
+    Perspective: {FOV: 46.0}
+    Position: {205.0, 105.0, 65.0}
+    LookAt: {0.0, 13.0, -150.0}
+    FlyController: {}
+  }
+
+  City city() {
+    Position: {0.0, 0.0, -150.0}
+  }
+}

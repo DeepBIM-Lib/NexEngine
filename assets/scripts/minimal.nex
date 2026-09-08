@@ -1,0 +1,42 @@
+using flecs.script
+using NexEngine.*
+
+MainScene{
+    Scene:{}
+    EnvironmentLight: {}
+    DirectionalLight: {}
+
+    MainCamera {
+      Perspective: {}
+      Position: {2.0, 2.0, 6.0}
+      LookAt: {2, 0, 0}
+      FlyController: {}
+    }
+
+    Cube {
+        (PrimitiveSource, Cube) : {1, 1, 1}
+
+        Material : {}
+        (MaterialSource, PhongMaterial) : {
+        }
+
+        Renderer:{
+            RenderType : All,
+            Visible : true
+        }
+    }
+
+    Sphere {
+        Position : {4, 0 , 0}
+
+        (PrimitiveSource, Sphere) : {1}
+        Material : {}
+        (MaterialSource, PBRMaterial) : {
+        }
+
+        Renderer:{
+            RenderType : All,
+            Visible : true
+        }
+    }
+}

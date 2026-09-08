@@ -1,0 +1,15 @@
+[submodule "externals/DiligentCore"]
+	path = externals/DiligentCore
+	url = https://github.com/DiligentGraphics/DiligentCore.git
+[submodule "externals/DiligentTools"]
+	path = externals/DiligentTools
+	url = https://github.com/DiligentGraphics/DiligentTools.git
+[submodule "externals/flecs"]
+	path = externals/flecs
+	url = https://github.com/SanderMertens/flecs.git
+[submodule "externals/glfw"]
+	path = externals/glfw
+	url = https://github.com/glfw/glfw.git
+[submodule "externals/DirectXMath"]
+	path = externals/DirectXMath
+	url = https://github.com/microsoft/DirectXMath.git
